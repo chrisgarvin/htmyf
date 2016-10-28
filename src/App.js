@@ -7,25 +7,33 @@ const feelings = ["better", "bad", "good", "right", "guilty", "sick", "same", "s
 const AppDashboard = React.createClass({
   getInitialState: function() {
     return {
-        feelings: [],
-        disabled: false
+        upperFeelings: [],
+        lowerFeelings: [],
+        upperDisabled: false,
+        lowerDisabled: true
     };
   },
   handleClick: function(feeling) {
     console.log(feeling)
-    this.setState({disabled: true})
+    if(!this.state.upperDisabled){
+      this.setState({upperDisabled: true, lowerDisabled: false})
+    } else {
+      this.setState({lowerDisabled: true})
+    }
   },
   componentDidMount: function () {
     this.updateState()
     setInterval(this.updateState, 10000)
   },
   updateState: function () {
-    if(!this.state.disabled){
-      const Feelings = []
-      for(var i = 0; i < 36; i++){
-        Feelings.push(feelings[Math.floor(Math.random() * (feelings.length))])
-      }
-      this.setState({feelings: Feelings})
+    const Feelings = []
+    for(var i = 0; i < 36; i++){
+      Feelings.push(feelings[Math.floor(Math.random() * (feelings.length))])
+    }
+    if(!this.state.upperDisabled){
+      this.setState({upperFeelings: Feelings, lowerFeelings: Feelings})
+    } else if(!this.state.lowerDisabled){
+      this.setState({lowerFeelings: Feelings})
     }
   },
   render: function() {
@@ -34,15 +42,15 @@ const AppDashboard = React.createClass({
         <FeelingButtonList
           onButtonClick={this.handleClick}
           btnClass={"btn btn-info btns"}
-          feelings={this.state.feelings}
-          buttonStatus={this.state.disabled}/>
+          feelings={this.state.upperFeelings}
+          buttonStatus={this.state.upperDisabled}/>
         <Header/>
         <InputBox/>
         <FeelingButtonList
           onButtonClick={this.handleClick}
           btnClass={"btn btn-warning btns"}
-          feelings={this.state.feelings}
-          buttonStatus={this.state.disabled}/>
+          feelings={this.state.lowerFeelings}
+          buttonStatus={this.state.lowerDisabled}/>
       </div>
     )
   }
@@ -94,8 +102,14 @@ const FeelingButtonList = React.createClass({
 });
 
 const FeelingButton = React.createClass({
+    getInitialState: function() {
+      return {
+          btnClass: this.props.btnClass
+      };
+    },
     handleClick: function() {
       this.props.onButtonClick(this.props.feeling)
+      this.setState({btnClass: "btn btn-success btns"})
     },
     render: function() {
         return (
@@ -103,7 +117,7 @@ const FeelingButton = React.createClass({
               <button
                 disabled={this.props.buttonStatus}
                 onClick={this.handleClick}
-                className={this.props.btnClass}
+                className={this.state.btnClass}
                 type="submit">
                 {this.props.feeling}
               </button>
