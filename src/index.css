@@ -3,3 +3,10 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+.btns {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+textarea {
+  resize: none;
+}
