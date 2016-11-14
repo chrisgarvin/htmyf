@@ -10,3 +10,6 @@ body {
 textarea {
   resize: none;
 }
+.stat {
+  padding: 5px;
+}

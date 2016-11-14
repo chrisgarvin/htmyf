@@ -1,13 +1,16 @@
 import React from 'react';
 import './App.css';
 import { randomFeeling } from './client.js'
-import { postMessage, getMessage } from './api_calls.js'
+import { postMessage, getMessage, getStats } from './api_calls.js'
 var $ = require ('jquery')
 
 const AppDashboard = React.createClass({
   getInitialState: function() {
     return {
+        stats: {reactions: {}, current: {}},
         upperFeelings: [],
+        upperChoice: null,
+        lowerChoice: null,
         lowerFeelings: [],
         currentMessage: "",
         upperDisabled: false,
@@ -16,10 +19,17 @@ const AppDashboard = React.createClass({
   },
   handleClick: function(feeling, message) {
     if(!this.state.upperDisabled){
-      this.setState({upperDisabled: true, lowerDisabled: false})
+      this.setState({
+        upperDisabled: true,
+        lowerDisabled: false,
+        upperChoice: feeling
+      })
     } else {
-      postMessage(message);
-      this.setState({lowerDisabled: true})
+      postMessage(message, this.state.upperChoice, feeling);
+      this.setState({
+        lowerDisabled: true,
+        lowerChoice: feeling
+      })
     }
   },
   componentDidMount: function () {
@@ -31,6 +41,10 @@ const AppDashboard = React.createClass({
     getMessage()
     .then(function(message) {
       self.setState({currentMessage: message})
+    })
+    getStats()
+    .then(function(stats) {
+      self.setState({stats: stats})
     })
     const Feelings = []
     for(var i = 0; i < 36; i++){
@@ -45,6 +59,9 @@ const AppDashboard = React.createClass({
   render: function() {
     return (
       <div className="App container-fluid">
+        <StatList
+          data={this.state.stats["reactions"]}
+          type="Reaction"/>
         <FeelingButtonList
           onButtonClick={this.handleClick}
           btnClass={"btn btn-info btns"}
@@ -59,8 +76,31 @@ const AppDashboard = React.createClass({
           btnClass={"btn btn-warning btns"}
           feelings={this.state.lowerFeelings}
           buttonStatus={this.state.lowerDisabled}/>
+        <StatList
+          data={this.state.stats["current"]}
+          type="Current"/>
       </div>
     )
+  }
+})
+
+const StatList = React.createClass({
+  render: function() {
+    const stats = Object.keys(this.props.data).map((key, i) => (
+      <span className="stat"
+            key={"data-" + i}>
+        {key} : {this.props.data[key]}
+      </span>
+    ))
+    if(this.props.type === "Reaction"){
+      return (
+        <div> {stats} </div>
+      )
+    } else {
+      return (
+        <div> {stats} </div>
+      )
+    }
   }
 })
 
